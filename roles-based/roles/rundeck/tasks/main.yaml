@@ -1,0 +1,59 @@
+---
+- name: stop rundeck
+  shell: |
+    source /etc/profile
+    PID=`jps -l|grep {{rundeck_install_package}}| awk '{print $1}'`
+      if [[ -n $PID ]];then
+        echo 'stopping rundeck...'
+        kill $PID
+        while [ true ]; do
+          sleep 1
+          PID=`jps -l|grep {{rundeck_install_package}}| awk '{print $1}'`
+          if [[ -z $PID ]];then
+            echo 'rundeck stopped...'
+            break
+          fi
+        done
+    else
+      echo 'rundeck not started, does not need stop...'
+    fi
+  args:
+    executable: '/bin/zsh'
+  tags:
+    - stop rundeck
+
+- name: setup rundeck directory
+  file:
+    path: '{{rundeck_home}}'
+    mode: 0644
+    state: directory
+
+- name: install rundeck package
+  shell: |
+    cd {{rundeck_home}}
+    wget http://192.168.56.98/api/download/softwares/rundeck/{{rundeck_install_package}}
+
+- name: install rundeck runtime package
+  unarchive:
+    src: http://192.168.56.98/api/download/softwares/rundeck/{{rundeck_runtime_package}}
+    dest: '{{rundeck_home}}'
+    remote_src: yes
+
+- name: configure dms host
+  blockinfile:
+    dest: /etc/hosts
+    block: |
+      192.168.56.90  dms.xyz.cn
+    marker: '# {mark} ANSIBLE MANAGED DMS HOST BLOCK'
+
+- name: start rundeck
+  shell: |
+    source /etc/profile
+    echo 'starting rundeck...'
+    nohup java -Drundeck.jaaslogin=true -Dloginmodule.conf.name=jaas-multi.conf -Dloginmodule.name=multiLoginModule -jar {{rundeck_install_package}}  > nohup.out 2&>1 &
+  args:
+    executable: '/bin/zsh'
+    chdir: "{{rundeck_home}}"
+  tags:
+    - start rundeck
+

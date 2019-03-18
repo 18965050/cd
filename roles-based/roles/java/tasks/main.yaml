@@ -1,0 +1,33 @@
+---
+- name: '保证 software_home 目录: {{software_home}} 存在'
+  file:
+    path: '{{software_home}}'
+    state: directory
+
+- name: '下载并解压 JDK 包'
+  unarchive:
+    src: http://192.168.56.98/api/download/softwares/jdk/jdk-{{oracle_java_version}}u{{oracle_java_update_version}}-linux-x64.tar.gz
+    dest: '{{software_home}}'
+    remote_src: yes
+
+- name: 重命名解压缩后的包
+  shell: |
+    rm -rf {{java_home}} || true
+    mv {{software_home}}/jdk1.{{oracle_java_version}}.0_{{oracle_java_update_version}} {{java_home}}
+  args:
+    executable: '/bin/zsh'
+    chdir: "{{software_home}}"
+
+- name: '配置 /etc/profile 环境变量'
+  blockinfile:
+    dest: /etc/profile
+    block: |
+      export JAVA_HOME={{java_home}}
+      export PATH=${PATH}:${JAVA_HOME}/bin
+    marker: '# {mark} ANSIBLE MANAGED JDK ENV BLOCK'
+
+- name: '建立 java 软链到 usr/bin/java,供一些特殊应用使用'
+  file:
+    path: /usr/bin/java
+    src: '{{java_home}}/bin/java'
+    state: link

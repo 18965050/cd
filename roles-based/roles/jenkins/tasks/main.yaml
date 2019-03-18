@@ -1,0 +1,52 @@
+---
+- name: stop jenkins
+  shell: |
+    source /etc/profile
+    PID=`jps -l|grep {{jenkins_install_package}}| awk '{print $1}'`
+    if [[ -n $PID ]];then
+      echo 'stopping jenkins...'
+      kill $PID
+      while [ true ]; do
+        sleep 1
+        PID=`jps -l|grep {{jenkins_install_package}}| awk '{print $1}'`
+        if [[ -z $PID ]];then
+          echo 'jenkins stopped...'
+          break
+        fi
+      done
+    else
+      echo 'jenkins not started, does not need stop...'
+    fi
+  args:
+    executable: '/bin/zsh'
+  tags:
+    - stop jenkins
+
+- name: setup jenkins directory
+  file:
+    path: '{{jenkins_home}}'
+    mode: 0644
+    state: directory
+
+- name: install jenkins package
+  shell: |
+    cd {{jenkins_home}}
+    wget http://192.168.56.98/api/download/softwares/jenkins/{{jenkins_install_package}}
+
+- name: install jenkins runtime package
+  unarchive:
+    src: http://192.168.56.98/api/download/softwares/jenkins/{{jenkins_runtime_package}}
+    dest: '~/'
+    remote_src: yes
+
+- name: start jenkins
+  shell: |
+    source /etc/profile
+    echo 'starting jenkins...'
+    nohup java -Dsun.jnu.encoding=UTF-8 -Dfile.encoding=UTF-8 -jar {{jenkins_install_package}} --httpPort=3999  > nohup.out 2&>1 &
+  args:
+    executable: '/bin/zsh'
+    chdir: "{{jenkins_home}}"
+  tags:
+    - start jenkins
+

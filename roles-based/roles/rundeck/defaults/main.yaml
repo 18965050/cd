@@ -1,0 +1,3 @@
+rundeck_home: '{{software_home}}/rundeck'
+rundeck_install_package: 'rundeck-3.0.16-20190223.war'
+rundeck_runtime_package: 'rundeck_runtime.tar.gz'

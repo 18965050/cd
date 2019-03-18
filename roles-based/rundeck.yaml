@@ -1,0 +1,6 @@
+---
+- name: 安装rundeck
+  hosts: rundeck
+  gather_facts: no
+  roles:
+    - rundeck

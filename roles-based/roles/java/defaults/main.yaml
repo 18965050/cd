@@ -1,0 +1,6 @@
+## 安装java需要的变量
+oracle_java_version: 8
+oracle_java_update_version: 111
+software_home: '/opt/software'
+java_home: '/opt/software/jdk_{{oracle_java_version}}_{{oracle_java_update_version}}'
+

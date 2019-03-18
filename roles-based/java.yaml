@@ -1,0 +1,6 @@
+---
+- name: 安装java
+  hosts: java
+  gather_facts: no
+  roles:
+    - java

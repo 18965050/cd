@@ -1,0 +1,6 @@
+---
+- name: 安装jenkins
+  hosts: jenkins
+  gather_facts: no
+  roles:
+    - jenkins
