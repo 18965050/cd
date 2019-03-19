@@ -1,0 +1,104 @@
+- defaultTab: output
+  description: metis deploy with dms
+  executionEnabled: true
+  group: dream
+  id: 8d0ebc54-977f-4a89-8b7c-413158a2b0ff
+  loglevel: INFO
+  maxMultipleExecutions: '6'
+  multipleExecutions: true
+  name: metis-dms
+  nodeFilterEditable: false
+  nodefilters:
+    dispatch:
+      excludePrecedence: true
+      keepgoing: false
+      rankOrder: ascending
+      successOnEmptyNodeFilter: false
+      threadcount: '2'
+    filter: 'tags: metis'
+  nodesSelectedByDefault: false
+  notification:
+    onfailure:
+      urls: http://dms.xyz.cn/api/deployment/changeByRundeckId/${execution.id}/${execution.status}
+    onsuccess:
+      urls: http://dms.xyz.cn/api/deployment/changeByRundeckId/${execution.id}/${execution.status}
+  notifyAvgDurationThreshold: null
+  options:
+  - description: 应用名称
+    enforced: true
+    name: APP_NAME
+    value: metis-mount-default
+    values:
+    - metis-app-mount
+    - metis-app-vdisk
+    - metis-mount-default
+  - description: 分支
+    enforced: true
+    label: label
+    name: branchName
+    valuesUrl: http://dms.xyz.cn/api/dmsBranch/project/17
+  - description: 发布环境(DEV,FAT)
+    enforced: true
+    name: ENV
+    value: DEV
+    values:
+    - DEV
+    - FAT
+  - description: 发布集群
+    enforced: true
+    name: CLUSTER
+    value: default
+    values:
+    - default
+    - second
+    - third
+  - description: 操作(deploy,start,stop,restart)
+    enforced: true
+    name: OPER
+    value: deploy
+    values:
+    - deploy
+    - restart
+    - start
+    - stop
+  - description: |-
+      已经构建失败的情况,是否还需要强制构建
+      **(不推荐 )**
+    enforced: true
+    name: failForceBuild
+    value: 'false'
+    values:
+    - 'false'
+    - 'true'
+  - description: |-
+      构建已经成功的情况,是否不使用构建的结果而强行重新构建
+      **(不推荐 )**
+    enforced: true
+    name: sucForceBuild
+    value: 'false'
+    values:
+    - 'false'
+    - 'true'
+  orchestrator:
+    type: rankTiered
+  scheduleEnabled: true
+  sequence:
+    commands:
+    - jobref:
+        args: -repoId 17
+        group: common
+        importOptions: true
+        name: checkArtifact
+        uuid: d030ee3a-2f81-4ea6-a00f-780c9cd2256f
+    - configuration:
+        debugOnly: 'true'
+      nodeStep: false
+      type: log-data-step
+    - args: APP_NAME=${option.APP_NAME}, OPER=${option.OPER}, ENV=${option.ENV}, CLUSTER=${option.CLUSTER}, RUNDECK_EXEC_ID=${job.execid},DELIVERY_FILE_URL=${export.checkedArtifactUrl}
+      interpreterArgsQuoted: false
+      scriptInterpreter: export TERM=linux &&
+      scripturl: http://git.xyz.cn/dream/xyzdeploy/raw/master/rundeck/runWithDms.sh
+    keepgoing: false
+    strategy: node-first
+  timeout: 10m
+  uuid: 8d0ebc54-977f-4a89-8b7c-413158a2b0ff
