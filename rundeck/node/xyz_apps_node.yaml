@@ -1,0 +1,7 @@
+- 192.168.xx.xx:
+  nodename: "xx.xx-Rundeck执行机器-GokuFAT"
+  hostname: "192.168.xx.xx"
+  tags: "Rundeck,FAT"
+  osFamily: unix
+  username: root
+
